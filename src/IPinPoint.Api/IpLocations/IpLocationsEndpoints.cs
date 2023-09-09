@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IPinPoint.Api.IpLocations;
@@ -30,9 +31,9 @@ public static class IpLocationsEndpoints
     public static void Map(WebApplication app)
     {
         app.MapGet("/ip-locations/{ipAddress}",
-                async ([FromRoute] string ipAddress, CancellationToken cancellationToken) =>
+                Task<Results<Ok<GetIpLocationResourceRepresentation>, NotFound>> ([FromRoute] string ipAddress, CancellationToken cancellationToken) =>
                 {
-                    return Task.FromResult(TypedResults.Problem("error", statusCode: 400));
+                    return Task.FromResult<Results<Ok<GetIpLocationResourceRepresentation>, NotFound>>(TypedResults.NotFound());
                 })
                 
             .AddEndpointFilterFactory((context, next) =>

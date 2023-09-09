@@ -17,6 +17,15 @@ public class GetIpLocationTests : IAsyncLifetime
         body!.Should().BeProblemDetails("Validation error", 400, "Invalid IP address format");
     }
 
+    [Fact]
+    public async Task ShouldReturnNotFoundForUnknownIp()
+    {
+        var (statusCode, body) = await _harness.GetIpLocation("1.1.1.1");
+        
+        statusCode.Should().Be(HttpStatusCode.NotFound);
+        body!.Should().BeNull();
+    }
+
     public Task InitializeAsync() => Task.CompletedTask;
 
     public async Task DisposeAsync()
