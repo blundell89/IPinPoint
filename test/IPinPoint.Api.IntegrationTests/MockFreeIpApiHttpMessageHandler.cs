@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace IPinPoint.Api.IntegrationTests;
 
-public class MockFreeIpApiHttpMessageHandlerHandler : HttpMessageHandler
+public class MockFreeIpApiHttpMessageHandler : HttpMessageHandler
 {
     private readonly ConcurrentBag<HttpRequestMessage> _invocations = new();
     private readonly List<(Predicate<HttpRequestMessage> shouldHandle, Func<HttpRequestMessage, HttpResponseMessage> handle)> _handlers = new();
@@ -18,9 +18,11 @@ public class MockFreeIpApiHttpMessageHandlerHandler : HttpMessageHandler
         return Task.FromResult(handler(request));
     }
 
-    public void AddNotFoundResponse(Predicate<HttpRequestMessage> shouldHandle,
+    public void AddResponse(Predicate<HttpRequestMessage> shouldHandle,
         Func<HttpRequestMessage, HttpResponseMessage> handle)
     {
         _handlers.Add((shouldHandle, handle));
     }
+    
+    public IReadOnlyList<HttpRequestMessage> Invocations => _invocations.ToList().AsReadOnly();
 }

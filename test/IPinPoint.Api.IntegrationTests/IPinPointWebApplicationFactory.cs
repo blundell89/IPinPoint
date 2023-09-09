@@ -10,13 +10,13 @@ public class IPinPointWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
-            services.AddSingleton<MockFreeIpApiHttpMessageHandlerHandler>();
+            services.AddSingleton<MockFreeIpApiHttpMessageHandler>();
             services.Configure<HttpClientFactoryOptions>("FreeIpApi", options =>
             {
                 options.HttpMessageHandlerBuilderActions.Add(
                     messageHandlerBuilder =>
                         messageHandlerBuilder.PrimaryHandler = 
-                            messageHandlerBuilder.Services.GetRequiredService<MockFreeIpApiHttpMessageHandlerHandler>());
+                            messageHandlerBuilder.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>());
             });
         });
     }
