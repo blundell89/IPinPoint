@@ -19,4 +19,10 @@
     </PackageReference>
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IPinPoint.Api\IPinPoint.Api.csproj" />
+    <ProjectReference Include="..\IPinPoint.Api.Tests.Shared\IPinPoint.Api.Tests.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

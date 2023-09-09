@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPinPoint.Api.IntegrationTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPinPoint.Api.UnitTests", "test\IPinPoint.Api.UnitTests\IPinPoint.Api.UnitTests.csproj", "{A81C2DE6-0BF9-44ED-8D23-806F1E62108F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPinPoint.Api.Tests.Shared", "test\IPinPoint.Api.Tests.Shared\IPinPoint.Api.Tests.Shared.csproj", "{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,10 +36,15 @@ Global
 		{A81C2DE6-0BF9-44ED-8D23-806F1E62108F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A81C2DE6-0BF9-44ED-8D23-806F1E62108F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A81C2DE6-0BF9-44ED-8D23-806F1E62108F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8E31E6D0-AA41-43CB-99E5-AD071EBF4923} = {42DCE7BD-1884-4CEC-B958-A55C69B2A6AF}
 		{9A81579F-49A5-460C-BB64-063A8A8733AB} = {C960A1EE-DB7A-45E8-9A48-649373B4D206}
 		{A81C2DE6-0BF9-44ED-8D23-806F1E62108F} = {C960A1EE-DB7A-45E8-9A48-649373B4D206}
+		{BFCA7FC4-0E68-4844-A0ED-5313CBD1A869} = {C960A1EE-DB7A-45E8-9A48-649373B4D206}
 	EndGlobalSection
 EndGlobal

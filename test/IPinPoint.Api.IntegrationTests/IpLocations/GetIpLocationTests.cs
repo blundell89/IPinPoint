@@ -3,13 +3,14 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using IPinPoint.Api.IntegrationTests.CustomAssertions;
+using IPinPoint.Api.Tests.Shared.IpLocations;
 
 namespace IPinPoint.Api.IntegrationTests.IpLocations;
 
 public class GetIpLocationTests : IAsyncLifetime
 {
     private readonly WebHarness _harness = new();
-    
+
     [Fact]
     public async Task ShouldReturnBadRequestForInvalidIp()
     {
@@ -30,12 +31,12 @@ public class GetIpLocationTests : IAsyncLifetime
             req => new HttpResponseMessage(HttpStatusCode.NotFound));
 
         var (statusCode, body) = await _harness.GetIpLocation(ip);
-        
+
         statusCode.Should().Be(HttpStatusCode.NotFound);
         body!.Should().BeNull();
         mockIpApiHttpHandler.Invocations.Should().HaveCount(1);
     }
-    
+
     [Fact]
     public async Task ShouldReturnIpLocationDataWhenMatchedFromFreeIpApi()
     {
@@ -43,23 +44,17 @@ public class GetIpLocationTests : IAsyncLifetime
         var mockIpApiHttpHandler = _harness.Factory.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>();
         var freeIpApiResponse = FreeIpApiResponses.SuccessResponse(ip);
         var freeIpApiContent = freeIpApiResponse.RootElement;
-        mockIpApiHttpHandler.AddResponse(
+        mockIpApiHttpHandler.AddSuccessResponse(
             req => req.Method == HttpMethod.Get &&
                    req.RequestUri!.AbsolutePath == $"/api/json/{ip}",
-            req =>
-            {
-                var responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-                responseMessage.Content = new StringContent(freeIpApiContent.ToString()!);
-                responseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json);
-                return responseMessage;
-            });
+            freeIpApiResponse);
 
         var (statusCode, body) = await _harness.GetIpLocation(ip);
-        
+
         statusCode.Should().Be(HttpStatusCode.OK);
         body!.Should().NotBeNull();
         var content = body!.RootElement;
-        
+
         content.GetProperty("ipAddress").GetString().Should().Be(ip);
         content.GetProperty("latitude").GetDouble().Should().Be(
             freeIpApiContent.GetProperty("latitude").GetDouble());
@@ -75,7 +70,7 @@ public class GetIpLocationTests : IAsyncLifetime
             freeIpApiContent.GetProperty("cityName").GetString());
         content.GetProperty("region").GetString().Should().Be(
             freeIpApiContent.GetProperty("regionName").GetString());
-        
+
         mockIpApiHttpHandler.Invocations.Should().HaveCount(1);
     }
 

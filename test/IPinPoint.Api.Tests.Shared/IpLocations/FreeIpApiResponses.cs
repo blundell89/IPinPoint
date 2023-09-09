@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace IPinPoint.Api.IntegrationTests.IpLocations;
+namespace IPinPoint.Api.Tests.Shared.IpLocations;
 
 public static class FreeIpApiResponses
 {

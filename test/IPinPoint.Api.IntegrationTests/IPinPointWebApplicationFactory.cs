@@ -1,3 +1,4 @@
+using IPinPoint.Api.Tests.Shared.IpLocations;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Http;

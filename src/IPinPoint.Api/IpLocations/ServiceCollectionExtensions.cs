@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddScoped<GetIpLocationHandler>()
+            .AddMemoryCache()
             .AddFreeIpApi();
 
         return services;
