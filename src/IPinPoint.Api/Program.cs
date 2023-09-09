@@ -1,3 +1,5 @@
+using IPinPoint.Api.IpLocations;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
@@ -14,6 +16,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+IpLocationsEndpoints.Map(app);
 
 app.Run();
 

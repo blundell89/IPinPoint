@@ -1,5 +1,6 @@
 using System.Net;
 using FluentAssertions;
+using IPinPoint.Api.IntegrationTests.CustomAssertions;
 
 namespace IPinPoint.Api.IntegrationTests.Swagger;
 

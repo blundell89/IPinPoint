@@ -11,10 +11,9 @@ public sealed class WebHarness : IAsyncDisposable
     {
         var client = Factory.CreateClient();
         var response = await client.GetAsync("/swagger/index.html");
-        if (!response.IsSuccessStatusCode)
-            return (response, null);
-        
         var content = await response.Content.ReadAsStringAsync();
+        if (content.Length is 0)
+            return (response, null);
         return (response, content);
     }
     
@@ -22,10 +21,9 @@ public sealed class WebHarness : IAsyncDisposable
     {
         var client = Factory.CreateClient();
         var response = await client.GetAsync("/swagger/v1/swagger.json");
-        if (!response.IsSuccessStatusCode)
-            return (response.StatusCode, null);
-        
         var content = await response.Content.ReadAsStreamAsync();
+        if (content.Length is 0)
+            return (response.StatusCode, null);
         return (response.StatusCode, await JsonDocument.ParseAsync(content));
     }
     
@@ -33,10 +31,10 @@ public sealed class WebHarness : IAsyncDisposable
     {
         var client = Factory.CreateClient();
         var response = await client.GetAsync($"/ip-locations/{ip}");
-        if (!response.IsSuccessStatusCode)
-            return (response.StatusCode, null);
         
         var content = await response.Content.ReadAsStreamAsync();
+        if (content.Length is 0)
+            return (response.StatusCode, null);
         return (response.StatusCode, await JsonDocument.ParseAsync(content));
     }
 
