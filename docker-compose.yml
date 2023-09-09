@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  ipinpointapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"

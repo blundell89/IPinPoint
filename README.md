@@ -7,3 +7,10 @@ Design a micro-service that would use (wrap, really) any of the 3rd party locati
 - Unit tests
 - Integration tests
 - It may use Swagger (or Postman) as a UI.
+
+# Running the app
+
+1. Clone the repo
+2. Run `docker compose up --detached` to start the service
+3. Navigate to http://localhost:5000/swagger
+4. Use the swagger UI to test the service
