@@ -28,6 +28,15 @@ public static class IpLocationsEndpoints
                     GetIpLocationHandler.NotFound => Results.NotFound(),
                     _ => Results.Problem(statusCode: 500, detail: "Internal server error", title: "Server error")
                 };
+            })
+            .Produces<GetIpLocationResourceRepresentation>()
+            .ProducesProblem(400)
+            .Produces(404)
+            .WithOpenApi(op =>
+            {
+                op.Description = "Retrieve location data for an IP address";
+
+                return op;
             });
     }
 
