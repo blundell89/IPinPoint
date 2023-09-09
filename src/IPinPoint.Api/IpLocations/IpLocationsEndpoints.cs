@@ -1,54 +1,44 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
+using IPinPoint.Api.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IPinPoint.Api.IpLocations;
-
-public record GetIpLocation([FromRoute]string IpAddress);
-
-public class ValidIpAddressAttribute : ValidationAttribute
-{
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-    {
-        if (value is null)
-        {
-            return ValidationResult.Success;
-        }
-
-        if (value is not string ipAddressValue || !IPAddress.TryParse(ipAddressValue, out var _))
-        {
-            return new ValidationResult("Invalid IP address format.");
-        }
-
-        return ValidationResult.Success;
-    }
-}
-
 
 public static class IpLocationsEndpoints
 {
     public static void Map(WebApplication app)
     {
         app.MapGet("/ip-locations/{ipAddress}",
-                Task<Results<Ok<GetIpLocationResourceRepresentation>, NotFound>> ([FromRoute] string ipAddress, CancellationToken cancellationToken) =>
-                {
-                    return Task.FromResult<Results<Ok<GetIpLocationResourceRepresentation>, NotFound>>(TypedResults.NotFound());
-                })
-                
-            .AddEndpointFilterFactory((context, next) =>
+            async ([FromRoute] string ipAddress,
+                [FromServices] GetIpLocationHandler handler,
+                CancellationToken cancellationToken) =>
             {
-                return async invocationContext =>
+                if (string.IsNullOrEmpty(ipAddress) || !IPAddress.TryParse(ipAddress, out var validIpAddress))
+                    return Results.Problem(
+                        statusCode: 400,
+                        detail: "Invalid IP address format",
+                        title: "Validation error");
+
+                var result = await handler.Handle(new GetIpLocationHandler.GetIpLocation(validIpAddress),
+                    cancellationToken);
+                
+                return result switch
                 {
-                    var routeIpAddress = invocationContext.GetArgument<string>(0);
-                    if (string.IsNullOrEmpty(routeIpAddress) || !IPAddress.TryParse(routeIpAddress, out _))
-                        return Results.Problem(statusCode: 400, detail: "Invalid IP address format", title: "Validation error");
-                    
-                    return await next(invocationContext);
+                    GetIpLocationHandler.Match match => Results.Ok(MapIpLocation(match.IpLocation)),
+                    GetIpLocationHandler.NotFound => Results.NotFound(),
+                    _ => Results.Problem(statusCode: 500, detail: "Internal server error", title: "Server error")
                 };
             });
     }
-}
 
-public record GetIpLocationResourceRepresentation(string IpAddress, float Latitude, float Longitude, string Country,
-    string CountryCode, string PostalCode, string City, string Region);
+    private static GetIpLocationResourceRepresentation MapIpLocation(IpLocation ipLocation) =>
+        new(
+            ipLocation.IpAddress.ToString(),
+            ipLocation.Latitude,
+            ipLocation.Longitude,
+            ipLocation.Country,
+            ipLocation.CountryCode,
+            ipLocation.PostalCode,
+            ipLocation.City,
+            ipLocation.Region);
+}
