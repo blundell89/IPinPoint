@@ -1,8 +1,20 @@
 using IPinPoint.Api.IpLocations;
+using IPinPoint.Api.MongoDb;
+using MongoDB.Driver;
+
+MongoDbConfigurator.Configure();
 
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
+
+services
+    .AddSingleton<IMongoClient>(_ => new MongoClient())
+    .AddSingleton<IMongoDatabase>(serviceProvider =>
+        serviceProvider.GetRequiredService<IMongoClient>().GetDatabase("ipinpoint"))
+    // ideally we would create indexes in a migration and exercise least privilege so that the application user doesn't have elevated permissions
+    .AddHostedService<MongoDbHostedService>();
+
 services
     .AddIpLocationsFeature()
     .AddEndpointsApiExplorer()

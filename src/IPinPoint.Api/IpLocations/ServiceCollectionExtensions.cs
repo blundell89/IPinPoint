@@ -1,4 +1,5 @@
 using IPinPoint.Api.IpLocations.FreeIpApi;
+using IPinPoint.Api.IpLocations.Persistence;
 
 namespace IPinPoint.Api.IpLocations;
 
@@ -8,6 +9,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddScoped<GetIpLocationHandler>()
+            .AddScoped<IpLocationRepository, MongoIpLocationRepository>()
             .AddMemoryCache()
             .AddFreeIpApi();
 

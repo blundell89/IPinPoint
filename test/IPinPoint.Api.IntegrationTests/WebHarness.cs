@@ -1,11 +1,26 @@
 using System.Net;
 using System.Text.Json;
+using IPinPoint.Api.Domain;
+using MongoDB.Driver;
 
 namespace IPinPoint.Api.IntegrationTests;
+
+public sealed class MongoDbHarness
+{
+    public MongoDbHarness(IServiceProvider serviceProvider)
+    {
+        IpLocations = serviceProvider.GetRequiredService<IMongoDatabase>()
+            .GetCollection<IpLocation>("ipLocations");
+    }
+    
+    public IMongoCollection<IpLocation> IpLocations { get; }
+}
 
 public sealed class WebHarness : IAsyncDisposable
 {
     public IPinPointWebApplicationFactory Factory { get; } = new();
+    
+    public MongoDbHarness MongoDb => new(Factory.Services);
 
     public async Task<(HttpResponseMessage Response, string? Content)> GetSwaggerUi()
     {

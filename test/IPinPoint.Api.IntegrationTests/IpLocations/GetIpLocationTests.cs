@@ -1,9 +1,11 @@
 using FluentAssertions;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Mime;
+using System.Net.Sockets;
+using IPinPoint.Api.Domain;
 using IPinPoint.Api.IntegrationTests.CustomAssertions;
+using IPinPoint.Api.Tests.Shared;
 using IPinPoint.Api.Tests.Shared.IpLocations;
+using MongoDB.Driver;
 
 namespace IPinPoint.Api.IntegrationTests.IpLocations;
 
@@ -40,7 +42,7 @@ public class GetIpLocationTests : IAsyncLifetime
     [Fact]
     public async Task ShouldReturnIpLocationDataWhenMatchedFromFreeIpApi()
     {
-        const string ip = "1.1.1.1";
+        var ip = RandomIpGenerator.Generate().ToString();
         var mockIpApiHttpHandler = _harness.Factory.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>();
         var freeIpApiResponse = FreeIpApiResponses.SuccessResponse(ip);
         var freeIpApiContent = freeIpApiResponse.RootElement;
@@ -72,6 +74,65 @@ public class GetIpLocationTests : IAsyncLifetime
             freeIpApiContent.GetProperty("regionName").GetString());
 
         mockIpApiHttpHandler.Invocations.Should().HaveCount(1);
+    }
+    
+    [Fact]
+    public async Task ShouldStoreIpLocationDataWhenMatchedFromFreeIpApi()
+    {
+        var ip = RandomIpGenerator.Generate().ToString();
+        var mockIpApiHttpHandler = _harness.Factory.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>();
+        var freeIpApiResponse = FreeIpApiResponses.SuccessResponse(ip);
+        var freeIpApiContent = freeIpApiResponse.RootElement;
+        mockIpApiHttpHandler.AddSuccessResponse(
+            req => req.Method == HttpMethod.Get &&
+                   req.RequestUri!.AbsolutePath == $"/api/json/{ip}",
+            freeIpApiResponse);
+
+        var (statusCode, body) = await _harness.GetIpLocation(ip);
+
+        statusCode.Should().Be(HttpStatusCode.OK);
+        
+        var ipAddressFilter = Builders<IpLocation>.Filter.Eq(nameof(IpLocation.IpAddress), ip);
+        var ipLocationDocument = await _harness.MongoDb.IpLocations.Find(ipAddressFilter).FirstOrDefaultAsync();
+
+        ipLocationDocument.Should().NotBeNull();
+        ipLocationDocument!.IpAddress.ToString().Should().Be(ip);
+        ipLocationDocument.Latitude.Should().Be(
+            (float)freeIpApiContent.GetProperty("latitude").GetDouble());
+        ipLocationDocument.Longitude.Should().Be(
+            (float)freeIpApiContent.GetProperty("longitude").GetDouble());
+        ipLocationDocument.Country.Should().Be(
+            freeIpApiContent.GetProperty("countryName").GetString());
+        ipLocationDocument.CountryCode.Should().Be(
+            freeIpApiContent.GetProperty("countryCode").GetString());
+        ipLocationDocument.PostalCode.Should().Be(
+            freeIpApiContent.GetProperty("zipCode").GetString());
+        ipLocationDocument.City.Should().Be(
+            freeIpApiContent.GetProperty("cityName").GetString());
+        ipLocationDocument.Region.Should().Be(
+            freeIpApiContent.GetProperty("regionName").GetString());
+    }
+    
+    [Fact]
+    public async Task ShouldReturnOkWithAnIpV6()
+    {
+        var ip = RandomIpGenerator.Generate(AddressFamily.InterNetworkV6);
+        var mockIpApiHttpHandler = _harness.Factory.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>();
+        var freeIpApiResponse = FreeIpApiResponses.SuccessResponse(ip.ToString());
+        mockIpApiHttpHandler.AddSuccessResponse(
+            req => req.Method == HttpMethod.Get &&
+                   req.RequestUri!.AbsolutePath == $"/api/json/{ip}",
+            freeIpApiResponse);
+
+        var (statusCode, body) = await _harness.GetIpLocation(ip.ToString());
+
+        statusCode.Should().Be(HttpStatusCode.OK);
+        
+        var ipAddressFilter = Builders<IpLocation>.Filter.Eq(nameof(IpLocation.IpAddress), ip);
+        var ipLocationDocument = await _harness.MongoDb.IpLocations.Find(ipAddressFilter).FirstOrDefaultAsync();
+
+        ipLocationDocument.Should().NotBeNull();
+        ipLocationDocument!.IpAddress.ToString().Should().Be(ip.ToString());
     }
 
     public Task InitializeAsync() => Task.CompletedTask;

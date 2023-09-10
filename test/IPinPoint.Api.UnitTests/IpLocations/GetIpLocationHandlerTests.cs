@@ -2,9 +2,11 @@ using System.Net;
 using FluentAssertions;
 using IPinPoint.Api.IpLocations;
 using IPinPoint.Api.IpLocations.FreeIpApi;
+using IPinPoint.Api.IpLocations.Persistence;
 using IPinPoint.Api.Tests.Shared.IpLocations;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace IPinPoint.Api.UnitTests.IpLocations;
 
@@ -20,7 +22,7 @@ public class GetIpLocationHandlerTests
         {
             BaseAddress = new Uri("https://test.test", UriKind.Absolute)
         }, NullLogger<FreeIpApiHttpClient>.Instance);
-        var handler = new GetIpLocationHandler(freeIpApiClient, new MemoryCache(new MemoryCacheOptions()));
+        var handler = new GetIpLocationHandler(freeIpApiClient, new MemoryCache(new MemoryCacheOptions()), Mock.Of<IpLocationRepository>());
 
         var request = new GetIpLocationHandler.GetIpLocation(ip);
         await handler.Handle(request, CancellationToken.None);
@@ -40,7 +42,7 @@ public class GetIpLocationHandlerTests
             BaseAddress = new Uri("https://test.test", UriKind.Absolute)
         }, NullLogger<FreeIpApiHttpClient>.Instance);
         var memoryCache = new MemoryCache(new MemoryCacheOptions());
-        var handler = new GetIpLocationHandler(freeIpApiClient, memoryCache);
+        var handler = new GetIpLocationHandler(freeIpApiClient, memoryCache, Mock.Of<IpLocationRepository>());
 
         var request = new GetIpLocationHandler.GetIpLocation(ip);
         await handler.Handle(request, CancellationToken.None);
@@ -48,6 +50,5 @@ public class GetIpLocationHandlerTests
         
         mockFreeIpApiHttpMessageHandler.Invocations.Should().HaveCount(2);
         memoryCache.TryGetValue(ip.ToString(), out _).Should().BeFalse();
-
     }
 }
