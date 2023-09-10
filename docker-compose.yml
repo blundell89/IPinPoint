@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:80"
+    environment:
+      - MongoDb__ConnectionString=mongodb://mongodb:27017
 
   mongodb:
     image: mongo:latest
