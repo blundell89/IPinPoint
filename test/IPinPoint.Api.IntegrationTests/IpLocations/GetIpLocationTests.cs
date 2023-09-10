@@ -25,14 +25,14 @@ public class GetIpLocationTests : IAsyncLifetime
     [Fact]
     public async Task ShouldReturnNotFoundForUnknownIp()
     {
-        const string ip = "1.1.1.1";
+        var ip = RandomIpGenerator.Generate();
         var mockIpApiHttpHandler = _harness.Factory.Services.GetRequiredService<MockFreeIpApiHttpMessageHandler>();
         mockIpApiHttpHandler.AddResponse(
             req => req.Method == HttpMethod.Get &&
                    req.RequestUri!.AbsolutePath == $"/api/json/{ip}",
             req => new HttpResponseMessage(HttpStatusCode.NotFound));
 
-        var (statusCode, body) = await _harness.GetIpLocation(ip);
+        var (statusCode, body) = await _harness.GetIpLocation(ip.ToString());
 
         statusCode.Should().Be(HttpStatusCode.NotFound);
         body!.Should().BeNull();

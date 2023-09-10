@@ -3,6 +3,7 @@ using FluentAssertions;
 using IPinPoint.Api.IpLocations;
 using IPinPoint.Api.IpLocations.FreeIpApi;
 using IPinPoint.Api.IpLocations.Persistence;
+using IPinPoint.Api.Tests.Shared;
 using IPinPoint.Api.Tests.Shared.IpLocations;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,7 +16,7 @@ public class GetIpLocationHandlerTests
     [Fact]
     public async Task ShouldUseCacheOnSubsequentRequestsAfterASuccessfulGet()
     {
-        var ip = IPAddress.Parse("2.2.2.2");
+        var ip = RandomIpGenerator.Generate();
         var mockFreeIpApiHttpMessageHandler = new MockFreeIpApiHttpMessageHandler();
         mockFreeIpApiHttpMessageHandler.AddSuccessResponse(_ => true, FreeIpApiResponses.SuccessResponse(ip.ToString()));
         var freeIpApiClient = new FreeIpApiHttpClient(new HttpClient(mockFreeIpApiHttpMessageHandler)
@@ -34,7 +35,7 @@ public class GetIpLocationHandlerTests
     [Fact]
     public async Task ShouldBypassCacheWhenIpLocationDataNotFound()
     {
-        var ip = IPAddress.Parse("2.2.2.2");
+        var ip = RandomIpGenerator.Generate();
         var mockFreeIpApiHttpMessageHandler = new MockFreeIpApiHttpMessageHandler();
         mockFreeIpApiHttpMessageHandler.AddResponse(_ => true, _ => new HttpResponseMessage(HttpStatusCode.NotFound));
         var freeIpApiClient = new FreeIpApiHttpClient(new HttpClient(mockFreeIpApiHttpMessageHandler)
